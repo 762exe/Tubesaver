@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111111">
+  <title>TubeSaver</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 18px;
+      background: #101114;
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    main {
+      max-width: 440px;
+      margin: 35px auto;
+    }
+    .logo {
+      color: #ff3347;
+      font-size: 28px;
+      font-weight: 800;
+    }
+    p { color: #aaa; line-height: 1.5; }
+    input, button {
+      width: 100%;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 16px;
+      margin-top: 12px;
+    }
+    input {
+      background: #202126;
+      color: white;
+      border: 1px solid #444;
+    }
+    button {
+      background: #ff3347;
+      color: white;
+      border: 0;
+      font-weight: 700;
+    }
+    .panel {
+      margin-top: 24px;
+      padding: 18px;
+      border-radius: 16px;
+      background: #202126;
+    }
+    #preview { width: 100%; border-radius: 10px; }
+    a { color: #ff6675; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="logo">▶ TubeSaver</div>
+  <p>Save videos you have permission to download.</p>
+
+  <label for="url">Video link</label>
+  <input id="url" type="url"
+    placeholder="Paste a video or MP4 link">
+
+  <button id="previewButton">Preview link</button>
+
+  <section class="panel" id="result" hidden>
+    <img id="preview" alt="Video thumbnail" hidden>
+    <p id="message" role="status"></p>
+    <a id="download" hidden download="video.mp4">
+      Save MP4 file
+    </a>
+  </section>
+
+  <p style="font-size:13px">
+    For YouTube, use its official download features where available.
+    Direct MP4 links can be saved using the download control.
+  </p>
+</main>
+
+<script>
+const urlInput = document.getElementById("url");
+const result = document.getElementById("result");
+const message = document.getElementById("message");
+const preview = document.getElementById("preview");
+const download = document.getElementById("download");
+
+document.getElementById("previewButton").onclick = () => {
+  const value = urlInput.value.trim();
+  result.hidden = false;
+  preview.hidden = true;
+  download.hidden = true;
+
+  let parsed;
+  try {
+    parsed = new URL(value);
+    if (!["https:", "http:"].includes(parsed.protocol)) {
+      throw new Error();
+    }
+  } catch {
+    message.textContent = "Please enter a valid video URL.";
+    return;
+  }
+
+  const host = parsed.hostname.toLowerCase();
+
+  if (["youtube.com", "www.youtube.com",
+       "m.youtube.com", "youtu.be",
+       "www.youtube-nocookie.com"].includes(host)) {
+    message.textContent =
+      "YouTube link recognized. Use YouTube's permitted download options; this website cannot extract the video file.";
+    return;
+  }
+
+  if (parsed.protocol !== "https:") {
+    message.textContent =
+      "For safety, use a secure HTTPS video link.";
+    return;
+  }
+
+  if (parsed.pathname.toLowerCase().endsWith(".mp4")) {
+    message.textContent =
+      "Direct MP4 link detected. Tap below to open the file.";
+    download.href = parsed.href;
+    download.hidden = false;
+  } else {
+    message.textContent =
+      "Link received. A direct MP4 file link is needed for this demo.";
+  }
+};
+</script>
+</body>
+</html>
